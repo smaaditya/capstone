@@ -25,11 +25,42 @@ FPGA/RTL model).
 
 ## Prerequisites
 
-* MSYS2/MinGW or any POSIX‑style shell on Windows (commands below assume
-  `/c/Users/Mithun/capstone` as the workspace root).
-* `gcc` and `make` available in the shell.
-* OpenSSL development libraries (`-lcrypto`) for AES/PRNG.
+* MSYS2/MinGW environment on Windows.
 * A test image file (e.g. `image.png`) to encrypt.
+
+### Installing build tools in MSYS2
+
+If this is your first time, install the necessary development tools and libraries:
+
+```sh
+pacman -Syu                  # update package database
+pacman -S gcc                # GCC compiler (MSYS native)
+pacman -S openssl-devel      # OpenSSL dev libraries
+pacman -S make               # GNU Make
+```
+
+After installation, close and reopen your MSYS shell. Verify everything is ready:
+
+```sh
+gcc --version
+make --version
+```
+
+Both should report version numbers. If `gcc` is still not found, you may have
+installed the MinGW version instead of the MSYS version. Check which version
+is installed:
+
+```sh
+pacman -Qi gcc
+```
+
+If it says `Architecture: x86_64-w64-mingw32`, uninstall it and use the MSYS
+native version:
+
+```sh
+pacman -R mingw-w64-x86_64-gcc
+pacman -S gcc openssl-devel make
+```
 
 ## Building the tools
 
