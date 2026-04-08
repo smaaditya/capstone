@@ -1,0 +1,1995 @@
+
+--- PAGE 1 ---
+ 
+ 
+SECURE IMAGE TRANSMISSION ON RISC -V: 
+A HARDWARE IMPLEMENTATION OF 
+HYBRID POST QUANTUM PROTOCOL  
+A project report submitted in partial fulfilment  
+of the requirements for the degree of  
+ 
+Bachelor of Technology  
+in 
+Electronics and Communication Engineering  
+by 
+MITHUN AADITYA  S 
+22BEC 1200  
+SHUBANU M  
+22BEC1278  
+HARINI SAKTHIVEL  
+22BEC1285  
+ 
+ 
+ 
+ 
+ 
+School of Electronics Engineering  
+Vellore Institute of Technology, Chennai  
+Vandalur  - Kelambakkam Road  
+Chennai – 600127, Indi a 
+ 
+ 
+April 202 6 
+
+
+--- PAGE 2 ---
+ 
+School of Electronics Engineering  
+Declaration  
+We hereby declare that the report titled SECURE IMAGE TRANSMISSION ON RISC -
+V: A HARDWARE IMPLEMENTATION OF HYBRID POST QUANTUM 
+PROTOCOL  submitted by us to the School of Electronics Engineering, Vellore Institute 
+of Technology, Chennai , in partial fulfilment  of the requirements for the award of Bachelor 
+of Technology  in Electronics and Communication Engineering , is a bonafide record of 
+the work carried out by us under the supervision of Dr SANKAR GANESH . 
+We further declare that the work reported in this report has not been submitted and will not 
+be submitted, either in part or in full, for the award of any other degree or diploma of this 
+institute or of any other institute or University.  
+Signature of the Student: ․․․․․․․․․․․․․․․․․․․․․․  
+Name and Reg. No.: ․․․․․․․․․․․․․․․․․․․․․․………………………….  
+Date:  ․․․․․․․․․․․․․․․․․․․․․․  
+Signature of the Student: ․․․․․․․․․․․․․․․․․․․․․․  
+Name and Reg. No.: ․․․․․․․․․․․․․․․․․․․․․․………………………….  
+Date:  ․․․․․․․․․․․․․․․․․․․․․․  
+Signature of the Student: ․․․․․․․․․․․․․․․․․․․․․․  
+Name and Reg. No.: ․․․․․․․․․․․․․․․․․․․․․․………………………….  
+Date:  ․․․․․․․․․․․․․․․․․․․․․․  
+ 
+ 
+ 
+ 
+i 
+ 
+
+
+--- PAGE 3 ---
+ 
+School of Electronics Engineering  
+Certificate  
+This is to certify that the project report titled SECURE IMAGE TRANSMISSION ON 
+RISC -V: A HARDWARE IMPLEMENTATION OF HYBRID POST QUANTUM 
+PROTOCOL  submitted by MITHUN AADITYA S  (22BEC1200 ), SHUBANU M  
+(22BEC1278 ), HARINI SAKTHIVEL  (22BEC1285 ) to Vellore Institute of Technology , 
+Chennai, in partial fulfilment  of the requirement for the award of the degree of Bachelor 
+of Technology  in Electronics and Communication Engineering  is a bonafide work 
+carried out under my supervision. The project report fulfils  the req uirements as per the 
+regulations of this University and , in my opinion , meets the necessary standards for 
+submission. The contents of this report have not been submitted and will not be submitted 
+either in part or in full, for the award of any other degree or diploma and the same is 
+certified.  
+Supervisor  Head of the Department  
+Signature:  ․․․․․․․․․․․․․․․․․․․․․․  Signature:  ․․․․․․․․․․․․․․․․․․․․․․  
+Name:        ․․․․․․․․․․․․․․․․․․․․․․  Name:        ․․․․․․․․․․․․․․․․․․․․․․  
+Date:         ․․․․․․․․․․․․․․․․․․․․․․  Date:         ․․․․․․․․․․․․․․․․․․․․․․  
+  
+Examiner 1  Examiner 2  
+Signature:  ․․․․․․․․․․․․․․․․․․․․․․  Signature:  ․․․․․․․․․․․․․․․․․․․․․․  
+Name:        ․․․․․․․․․․․․․․․․․․․․․․  Name:        ․․․․․․․․․․․․․․․․․․․․․․  
+Date:         ․․․․․․․․․․․․․․․․․․․․․․  Date:         ․․․․․․․․․․․․․․․․․․․․․․  
+ 
+ 
+(Seal of the School)  
+ii 
+
+
+--- PAGE 4 ---
+ 
+Abstract  
+Quantum computers aren't just a theoretical concern anymore, they're becoming real, and 
+that's a problem for our current security systems. The RSA and ECC algorithms  that we 
+rely on today; Shor's algorithm can break them efficiently once we have sufficiently 
+powerful quantum machines. This realization is what led toward exploring post -quantum 
+cryptography.  
+ 
+This project deals with implementing CRYSTALS -Kyber, which NIST finally 
+standardized in 2024 after years of evaluation. We built a working system that uses Kyber 
+for key exchange combined with AES -256 for actually encrypting image files. The setup 
+has two parts: a host application running on a regular computer (Windows with MSYS2), 
+and a receiver module designed for RISC -V processors that can run on actual FPGA 
+hardware or just simulation.  
+ 
+The implementation handles the complete workflow, which consists of generating keys, 
+encapsulating them, encrypting images, and decrypting them back. We tested it with 
+different image sizes and formats to see if everything works correctly. The results show  
+that while Kyber adds some overhead compared to traditional methods, it's manageable and 
+gives us security that should hold up even against quantum attacks.  
+ 
+For embedded systems like IoT devices or secure communication modules, this kind of 
+implementation matters because we can't just upgrade hardware easily once deployed. 
+Getting this working on RISC -V specifically is useful since it's an open architecture ga ining 
+traction in embedded spaces.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+iii 
+
+--- PAGE 5 ---
+Acknowledgements  
+ 
+We wish to express our sincere thanks and deep sense of gratitude to our project guide, Dr. 
+Sankar Ganesh , Professor, School of Electronics Engineering  (SENSE) , for his consistent 
+encouragement and valuable guidance offered to us in a pleasant manner throughout the 
+course of the project work.  
+ 
+We sincerely express our gratitude to Dr. Ravi Sankar A , Dean , SENSE ; Dr. 
+Mohanaprasad K , Associate Dean (Academics) , SENSE ; and Dr. Chitra K , Associate 
+Dean (Research), S ENSE , for providing the necessary facilities and for their constant 
+encouragement and support throughout our project.  
+ 
+We also extend our heartfelt thanks to Dr. Jagannath M , Head of the Department, for his 
+continuous guidance and support during the course of this project.  
+ 
+We also take this opportunity to thank all the faculty of the School for their support and 
+their wisdom imparted to us throughout the course.  
+ 
+We thank our parents, family, and friends for bearing with us throughout the course of our 
+project and for the opportunity they provided us in undergoing this course in such a 
+prestigious institution.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+iv 
+  
+
+--- PAGE 6 ---
+Codes and Standards  
+Project Title: Secure Image Transmission On Risc -V: A Hardware Implementation Of 
+Hybrid Post Quantum Protocol  
+1. Cryptographic  Standards  
+• FIPS  203 — Module -Lattice -Based Key -Encapsulation Mechanism Standard  
+o This is the actual NIST standard that came out in 2024. Kyber finally got 
+standardized after multiple rounds of competition since 2016.  
+• FIPS  197 — Advanced Encryption Standard (AES)  
+o Using AES -256-GCM here because Kyber only handles key exchange, not 
+bulk encryption.  
+• NIST  SP 800-185 — SHA -3 Derived Functions  
+o Kyber uses SHAKE -256 internally for various operations.  
+2. Communication  Standards  
+• RS-232/UART  — Serial Communication  
+o Used for the hardware deployment mode. Memory -mapped UART at 
+0x10000000 base address.  
+3. Hardware  Standards  
+• RISC -V ISA — Open instruction set  
+4. Software  Standards  
+Custom  AES -128-CTR  — Bare -metal AES implementation with manual key 
+schedule and CTR mode  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+v 
+
+--- PAGE 7 ---
+Mapping of Sustainable  Development Goals (SDGs)  
+ 
+ 
+Project Title  Mapped SDGs  Justification  Example Impact  
+Secure Image 
+Transmission 
+On Risc -V: A 
+Hardware 
+Implementation 
+Of Hybrid Post 
+Quantum 
+Protocol  SDG 1 7 – 
+Partnerships  Open -source 
+implementation helps 
+global collaboration on 
+PQC  Anyone can build on 
+this work for their own 
+security needs  
+SDG 16 – Institutions  Strong crypto protects data 
+privacy for government 
+and institutional use  Prevents sensitive data 
+exposure even with 
+quantum threats  
+SDG 9 – Industry, 
+Innovation and 
+Infrastructure  Building quantum -resistant 
+infrastructure for future 
+communication systems  Keeps industrial and 
+IoT systems secure as 
+quantum computing 
+advances  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+vi  
+
+--- PAGE 8 ---
+Contents  
+Table of Contents  
+CHAPTER 1  ................................ ................................ ................................ ........................  1 
+Introduction  ................................ ................................ ................................ ..........................  1 
+CHAPTER 2  ................................ ................................ ................................ ........................  4 
+Literature Survey  ................................ ................................ ................................ .................  4 
+2.1 The RISC -V Architecture: An Open, Modifiable Architecture for Encryption  .... 4 
+2.2 Algorithmic Limitations: Keccak, SHAKE, and NTT ................................ ...........  4 
+2.2.2 Number Theoretic Transform (NTT)  ................................ ................................ .. 5 
+2.3 Parallelism at the Hardware Level: SIMD & Dual -Issue Pipeline  ........................  5 
+2.4 Evolution of Standards: From FIPS 202 to FIPS 203  ................................ ................  6 
+CHAPTER 3  ................................ ................................ ................................ ........................  7 
+Methodology  ................................ ................................ ................................ ........................  7 
+3.1 System Architecture & Design Approach ................................ ................................ .. 7 
+3.1.2 Host Sender Module  ................................ ................................ ...........................  8 
+3.1.3 Secure Receiver Module  ................................ ................................ ...................  10 
+3.2 Kyber Cryptographic Implementation: The Lattice Engine  ................................ .... 12 
+3.2.1 The Number Theoretic Transform (NTT) and Butterfly Logic  ........................  12 
+3.2.2 Modular Reductions: Montgomery and Barret  ................................ .................  12 
+3.3 The Hashing and Randomness Core: Keccak and SHAKE  ................................ ..... 12 
+3.2.2 Encapsulation and Decapsulation  ................................ ................................ ..... 14 
+3.4 AES -128-GCM: Secure Data Encapsulation  ................................ ...........................  15 
+3.4.1 Counter Mode (CTR) and Galois Authentication  ................................ .............  15 
+3.5 Communication Protocol for Hardware Integration  ................................ ................  16 
+3.5.1 UART Memory -Mapped I/O (MMIO)  ................................ .............................  16 
+CHAPTER 4  ................................ ................................ ................................ ......................  17 
+Results and Discussion  ................................ ................................ ................................ ...... 17 
+4.1 Functional Testing  ................................ ................................ ................................ .. 17 
+4.2Physical design ................................ ................................ ................................ ..........  19 
+4.3Security Analyses ................................ ................................ ................................ ...... 20 
+CHAPTER 5  ................................ ................................ ................................ ......................  22 
+Appendix  ................................ ................................ ................................ ............................  22 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 9 ---
+ 
+List of Figures  
+3.1 System Architecture  ................................ ................................ ................................ .... 8 
+3.2 Host Sender Workflow  ................................ ................................ .............................  10 
+3.3 Secure Rec eiver Workflow  ................................ ................................ .......................  11 
+3.4 Kyber Key Encapsulation Process  ................................ ................................ ............  15 
+4.1 Original Vs Recovered Image Comparison  ................................ ..............................  17 
+4.2 Encryption Timing Analysis  ................................ ................................ .....................  18 
+4.3 Physical Design  ................................ ................................ ................................ .........  20 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+viii 
+  
+
+--- PAGE 10 ---
+List of Tables  
+3.1 Kyber Security Parameters  ................................ ................................ .......................  13 
+4.1 Performance Metrics for Different File Sizes  ................................ ...........................  18 
+4.2 Comparison with Traditional Cryptography  ................................ .............................  19 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ix 
+  
+
+--- PAGE 11 ---
+List of Acronyms  
+Acronym  Full Form  
+AES  Advanced Encryption Standard  
+KEM  Key Encapsulation Mechanism  
+PQC  Post-Quantum Cryptography  
+RISC -V Reduced Instruction Set Computer - Five 
+NIST  National Institute of Standards and Technology  
+UART  Universal Asynchronous Receiver -Transmitter  
+FPGA  Field Programmable Gate Array  
+MLWE  Module Learning With Errors  
+PK Public Key  
+SK Secret Key  
+CT Ciphertext  
+NTT  Number Theoretic Transform  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+x 
+
+--- PAGE 12 ---
+1 
+ CHAPTER 1  
+Introduction  
+ 
+At present, the world of cybersecurity faces a “cryptographic cliff.” Over the past few 
+decades, the security of practically all monetary transactions on the Internet, confidential 
+government communication, and private information has depended on the assum ption of 
+the difficulty of performing integer factorization (RSA) and discrete logarithm 
+computations (ECC). The validity of relying on cryptography has already been questioned 
+by the algorithm proposed by Peter Shor since as early as 1994.  
+ 
+This algorithm showed that an appropriately capable quantum computer, based on qubits 
+and quantum superposition principle, could perform the required computations in 
+polynomial time. In other words, whereas a classical computer would require billions of 
+years to break a 2048 -bit RSA key, a quantum computer would only need minutes to do so. 
+Due to the problem posed by such a development, the idea of "Harvest Now, Decrypt Later" 
+appeared.  
+ 
+As a result of this fundamental challenge to conventional cryptography, the US National 
+Institute of Standards and Technology (NIST) launched a worldwide contest in 2016 for 
+the creation of new standards in Post -Quantum Cryptography (PQC). In an almost dec ade-
+long process of cryptanalysis, August 2024 saw a landmark moment in the adoption of 
+CRYSTALS -Kyber into a standard named FIPS 203.  
+ 
+CRYSTALS -Kyber utilizes the Module Learning With Errors (M -LWE) problem. While 
+conventional cryptography such as RSA relies on number theory principles, M -LWE is 
+based on the geometric structure of lattices. This means that the problem revolves around 
+searching for a "secret" vector in a multi -dimensional space that has had noise injected into 
+it. Using even the most advanced quantum -accelerated algorithms makes it impossible to 
+navigate the lattice space.  
+ 
+The move from theoretical to practical is even harder when considering embedded systems. 
+Systems employed in the Internet of Things (IoT), industrial control, and edge computing 
+often have very constrained hardware resources, such as reduced SRAM, slower C PU clock 
+rates, and smaller energy footprints.  
+
+--- PAGE 13 ---
+2 
+  
+Existing Kyber designs require significant amounts of memory since public keys and 
+polynomial matrices are rather large in size. Moreover, many embedded devices have been 
+placed in "set -and-forget" locations (e.g., components on satellites, underwater sens ors) 
+where any hardware changes cannot occur. Thus, our project aims at addressing these 
+challenges by showing the feasibility of using post -quantum cryptography on a low -power 
+RISC -V architecture.  
+ 
+For this task, a highly advanced Key Encapsulation Mechanism (KEM) is applied in 
+conjunction with Data Encapsulation Mechanism (DEM). Hybrid model architecture is 
+used in this solution, which involves:  
+ 
+Asymmetric Encryption Stage: Key encapsulation mechanism (Kyber -768) is employed in 
+the early stages of the encryption process. In this way, even if a third party manages to 
+intercept the transmission, they won’t be able to decipher the key using quantum 
+computing.  
+ 
+Symmetric Encryption Stage: AES -256-GCM (Galois/Counter Mode) is used once the 
+encryption key is successfully encapsulated. AES -256 is used due to its resistance to 
+quantum computing Grover's Algorithm.  
+ 
+The architecture mimics an existing "Infrastructure -to-Edge" setup.  
+ 
+The Sender (Host): Simulates a powerful server/gateway that handles the complex 
+operations of Kyber encapsulation and AES encryption.  
+ 
+The Receiver (RISC -V): Simulates the edge device that undertakes the resource -intensive 
+tasks of decapsulation and decryption.  
+ 
+Two different communication approaches are used in the project: a file -based protocol for 
+offline testing and a Memory -Mapped UART (Universal Asynchronous Receiver -
+Transmitter). The latter is an important technical achievement since it enables the RISC -V 
+
+--- PAGE 14 ---
+3 
+ core to analyze the continuous stream of information in real time, resembling a live, secure 
+connection.  
+ 
+The use of image data is justified by both technical considerations and practical ones. On 
+one hand, images carry a high data load, serving as a demanding test for the performance 
+capabilities of the design. On the other hand, the confidentiality horizon f or some types of 
+images, such as medical diagnostics and satellite reconnaissance, can stretch into multiple 
+decades. This information needs to be protected now, not in the future.  
+ 
+In addition, visual image output serves as instant evidence of the integrity of the process. 
+Correct decoding produces a flawless copy of the image, whereas even one bit change in 
+the Kyber decapsulation or AES encryption fails entirely, resulting in the f ailure of the 
+GCM authentication tag or corruption of the output, thus proving the reliability of the 
+scheme.  
+ 
+The key contributions of this study include:  
+Portability of Code:  Enhancing the Kyber reference C code to work in a “freestanding” 
+mode without the convenience of an operating system.  
+ 
+Cross -Platform Coordination:  Setting up a reliable build process through riscv64 -
+unknown -elf compilers for cross -platform compilation of the target binaries from a host 
+computer.  
+  
+
+--- PAGE 15 ---
+4 
+ CHAPTER 2  
+Literature Survey  
+ 
+Quantum resistance is no longer an abstract cryptographic concept but an established part 
+of security engineering. In particular, NIST has recently completed the creation of the core 
+standards for lattice -based protocols for key encapsulation and digital s ignatures: FIPS 203 
+ML-KEM (formerly Kyber) [1] and FIPS 204 ML -DSA (formerly Dilithium) [3], 
+respectively. ML -KEM and ML -DSA are based on solving the shortest vector problem in 
+structured lattices, a mathematically difficult problem unsolved by any of the  known 
+quantum or classical algorithms (e.g., BKZ algorithm) [13][15].  
+ 
+2.1 The RISC -V Architecture: An Open, Modifiable Architecture for Encryption  
+The development of RISC -V has been revolutionary for the semiconductor sector since it 
+offers an open source ISA as opposed to proprietary x86 or ARM architectures [7]. What 
+makes this architecture so powerful in relation to cryptography is its modularity.  Unlike 
+fixed architectures where a number of features need to be included during design time, 
+RISC -V can allow developers to first implement a base integer architecture (e.g., RV32I, 
+RV64I) and add certain extensions, such as 'M' (integer multiplication) or 'K' (scalar 
+cryptography) [18].  
+ 
+Research has shown that despite the fact that RISC -V chips might currently have lower 
+clock frequencies compared to specialized x86 or ARM devices, they are much better at 
+IPC in memory bound kernels [10]. This property of the architecture is especially 
+important for the Hornet core and others that try to maximize encryption performance by 
+milliwatt [4][11].  
+ 
+2.2 Algorithmic Limitations: Keccak, SHAKE, and NTT  
+The computational cost of CRYSTALS -Kyber is primarily incurred in three major 
+operations: hashing, extendable output functions, and polynomial multiplication 
+[16].2.2.1 Keccak and SHAKE (FIPS 202)The permutation operation of Keccak -p[1600, 
+24] underlies the hash algorithms SHA3 -256 and SHA3 -512, and also the extendable -
+
+--- PAGE 16 ---
+5 
+ output functions (XOF) named SHAKE -128 and SHAKE -256 [2]. The SHAKE algorithm 
+in Kyber is widely employed for "Sponge Construction," which is responsible for 
+generating the large pseudo -random polynomial matrices ($A$) based on a tiny seed 
+reference implem entation has proven inefficient in dealing with the 24 rounds of 
+permutations demanded by the Keccak operation. However, research on 64 -bit dual -issue 
+RISC -V systems indicates that through smart scheduling of the "Rho" and "Pi" stages of 
+the permutation in  parallel in two pipelines, software engineers can obtain a 59.18% 
+performance enhancement relative to the regular reference implementation [5]. This 
+algorithmic improvement is critical for image encryption, where SHAKE needs to process 
+thousands of bytes to generate key expansions for every frame of images.  
+ 
+2.2.2 Number Theoretic Transform (NTT)  
+The most computationally complex operation within Kyber is polynomial multiplication. 
+This is carried out with O(n^2) complexity within the time domain. In order to attain the 
+necessary O(n \log n) complexity for a real -time system, Kyber makes use of a sp ecial 
+kind of FFT called the Number Theoretic Transform (NTT) [12].NTT performance on 
+RISC -V is largely influenced by modular reduction, namely Montgomery and Plantard 
+arithmetic. These two methods enable the processor to carry out lazy reduction while 
+avoiding costly divisions within the module. RISC -V assembly optimized for modular 
+multiplication takes advantage of the 'M' extension to accomplish the butterfly 
+computation of the NTT in fewer cycles, decreasing the decapsulation process latency for 
+process ors such as BOOM or Hornet [22][23].  
+ 
+2.3 Parallelism at the Hardware Level: SIMD & Dual -Issue Pipeline  
+Two important aspects of architecture have been employed to overcome the performance 
+disparity between software and hardware:  
+Packed -SIMD (P -Extension): Cryptography using lattices requires operations on numbers 
+of relatively small size (coefficients). The P -extension of the RISC -V instruction set 
+allows multiple 16 -bit/8-bit integers to be operated using a single instruction in a 32-
+bit/64 -bit register [19]. The use of "vector in scalar" gives large gains in terms of speed in 
+terms of polynomial addition and scaling, which happen often in the Kyber pipeline [20].  
+ 
+
+--- PAGE 17 ---
+6 
+ Dual -Issue Pipeline: By employing CPUs capable of fetching and executing two 
+instructions at once, the memory access overhead is reduced significantly. Particularly, 
+while one pipeline carries out the mathematical calculation of a matrix -vector 
+multiplicat ion operation, the other can pre -fetch the next row of the image to be encrypted 
+[11].  
+2.4 Evolution of Standards: From FIPS 202 to FIPS 203  
+The roadmap of Post -Quantum Cryptography began with the formalization of SHA -3 
+(FIPS 202) [2], which introduced the industry to the sponge -based hash design. This was 
+followed by the NIST PQC competition, which resulted in the selection of Kyber and 
+Dilith ium. 
+Current research, such as the ECO -CRYSTALS project, represents the pinnacle of this 
+evolution. It is the first highly -optimized assembly -level implementation to deploy these 
+NIST winners on the 64 -bit RISC -V ISA. These projects prove that by combining the 
+mathematical elegance of ML -KEM with the architectural flexibility of RISC -V, we can 
+achieve a security posture that is not only quantum -resistant but also efficient enough for 
+the next generation of embedded industrial and medical devices [6][25].  
+ 
+  
+
+--- PAGE 18 ---
+7 
+ CHAPTER 3  
+Methodology  
+ 
+3.1 System Architecture & Design Approach  
+The architectural basis of this secure image transmission system is the Heterogeneous 
+Client -Server Approach. This approach acknowledges the pragmatic nature of the current -
+day IoT and industrial environment, where data may originate from or reside in powe rful 
+"Host" hardware systems but need to be securely consumed by resource -starved "Edge" 
+computing platforms. For this project, the Sender (Host) is the high -end x86_64 computer 
+running inside an MSYS2 environment, whereas the Receiver (Target) is the cust om Hornet 
+RISC -V processor.  
+The system follows a Three -Layer Logical Approach:  
+Application Layer:  This layer deals with high -level data management. For the Sender, it 
+includes handling image file parsing from standard formats like PNG/JPG to raw pixel 
+arrays and constructing packets. For the Receiver, it involves allocating memory for the 
+input buffer  and ultimately reconstructing the pixel data.  
+The Cryptographic Layer:  This forms the heart of the project. The design incorporates 
+the CRYSTALS -Kyber (ML -KEM) protocol for quantum -resistant key exchange and 
+AES -128-GCM for fast symmetric encryption of data. With the separation of the key 
+exchange from the data encryption, t he "Hybrid Security," which means quantum resistance 
+for key exchange and silicon proven efficiency for the bulk data, is achieved.  
+ 
+The design of Kyber -768 is per the FIPS 203 standard and is based on the Module Learning 
+With Error (M -LWE) problem. While the security in the case of RSA is based on 
+factorization of prime numbers, the security in the case of Kyber is based on the hardnes s 
+of finding the shortest vector of the high dimensional lattice.  
+The secure image transmission system uses a client -server model with an asymmetric 
+architecture, wherein the server sender is a general -purpose computer having sufficient 
+computing resources, whereas the secure receiver is designed for platforms with limit ed 
+resources (RISC -V-based computing environment).  
+
+--- PAGE 19 ---
+8 
+ The design uses a layered approach, consisting of three main layers:  
+Application Layer : The application layer that includes the sender and receiver 
+applications.  
+Cryptographic Layer : The Kyber key exchange services and the AES -256-GCM 
+symmetric encryption and decryption algorithm.  
+Communication Layer : Two modes of communication, including file I/O and memory -
+mapped UART communication.  
+ 
+Figure 3.1 System Architecture  
+3.1.2 Host Sender Module  
+The sender host application runs under MSYS2 on Windows, selected for compatibility of 
+the development environment with laboratory infrastructure.  
+The design incorporates the following functions:  
+ 
+Public Key Fetching:  Public key is generated by the receiver and then sent; in the first 
+case, the key is loaded from a specified path, while in the second - received via UART.  
+ 
+Encryption:  Executing Kyber encryption results in a 32 -byte shared secret generation and 
+768, 1088, 1568 -byte ciphertext generation, depending on the security parameter of Kyber -
+
+
+--- PAGE 20 ---
+9 
+ 512, Kyber -768, and Kyber -1024, respectively. The generated secret can be used as key 
+material for AES -256 encryption.  
+ 
+Authenticated Encryption: An image file is encrypted using AES -256-GCM, where the 
+generated key serves as an encryption key, and the initialization vector is generated 
+randomly with a size of 96 bits.  
+ 
+Message Packaging:  The output message contains the four -byte length of the ciphertext 
+followed by the ciphertext itself, generated IV, ciphered payload, and authentication tag.  
+File Sending: In file sending, a message will be sent via a specified file path, while in UART 
+sending, the UART peripheral is mapped into memory and the message is byte -wise 
+transmitted, taking into account flow control checks.  
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 21 ---
+10 
+  
+Figure 3.2 Host Sender Workflow  
+ 
+3.1.3 Secure Receiver Module  
+The decryption and restoration processes occur via reverse functions in the secure receiver. 
+This software can be compiled locally to test on the host and cross -compiled for RISC -V 
+target execution.  
+Key Generation : On startup, it generates a Kyber key pair with random numbers based on 
+the machine's entropy. The public key is exposed for the host to transmit. The private key 
+is restricted to specific file access modes (0600).  
+Decapsulation : When the package arrives, it strips the Kyber ciphertext from the payload 
+and proceeds with decapsulation using the private key. In the reference implementation, 
+the default rejection function guarantees that any faulty ciphertext produces random shared 
+keys rather than errors, thwarting chosen -ciphertext attacks.  
+
+
+--- PAGE 22 ---
+11 
+ Decryption and Verification : Using the shared key, it decrypts using AES -256-GCM. 
+Before writing the decrypted data to memory, it checks the authenticity of the encryption.  
+UART Interface : For hardware mode, the UART device's registers are mapped at the base 
+address (default 0x10000000). Polling -based input/output was used for demonstration 
+simplicity, but interrupt -based I/O or DMA could be more efficient in practical 
+applications . 
+ 
+ 
+Figure 3.3 Secure Receiver Workflow  
+ 
+
+
+--- PAGE 23 ---
+12 
+  
+3.2 Kyber Cryptographic Implementation: The Lattice Engine  
+3.2.1 The Number Theoretic Transform (NTT) and Butterfly Logic  
+At the heart of Kyber is the multiplication of polynomials in the ring R_q = {Z}_q[X]/(X^n 
++ 1), where  n=256 and q=3329. A standard multiplication would require O(n^2) operations, 
+which is prohibitively slow for a RISC -V core. To optimize this, we utilize the Number 
+Theoretic Transform (NTT)  to move polynomials into the "Frequency Domain," reducing 
+complexity to O(n \log n).  
+The transform uses the Cooley -Tukey (CT) Butterfly  for the forward transform and the 
+Gentleman -Sande (GS) Butterfly  for the inverse transform. In a CT butterfly, we take 
+two coefficients and a "twiddle factor" (a power of the root of unity ) to produce two new 
+values. This allows for "In -Place" computation, meaning the 256 coefficients are updated 
+within the same memory block, drastically reducing the SRAM footprint on the Hornet 
+core. The inverse NTT (iNTT) then uses the GS butterfly to move the data back t o the 
+"Time Domain" after point -wise multiplication is complete.  
+3.2.2 Modular Reductions: Montgomery and Barret  
+Since all calculations in the Kyber encryption algorithm must be done modulo q=3329, the 
+processor will continuously have to do reductions. Using the % operator on a RISC -V 32 -
+bit architecture that does not have a hardware divider is very slow. Therefore, we 
+implement the Montgomery reduction method. The Montgomery reduction method 
+converts the modular reduction problem into a problem of multiplication and bit shifting 
+by converting numbers into the "Montgomery Domain" (by scaling by R=2^16). 
+Furthermore, B arret reduction is utilized for small constant -time reductions during 
+polynomial additions to prevent coefficient overflow.  
+3.3 The Hashing and Randomness Core: Keccak and SHAKE  
+Keccak -p[1600] permutation is the most computationally expensive module in the Kyber 
+stack and enables the use of the SHA3 -256/512 hash function family and the SHAKE -
+128/256 Extendable -Output Functions (XOF).3.3.1 The Keccak Sponge 
+Construction"Sponge Cons truction" is the basic idea behind the Keccak permutation, which 
+
+--- PAGE 24 ---
+13 
+ comprises two steps: absorb and squeeze. In the former, the input message (e.g., the seed 
+of the public key) is XORed into the internal 1600 -bit state, which is subjected to 24 rounds 
+of Keccak -f permutation. In the latter stage, pseudo -random bits are "sq ueezed" out of the 
+internal state.In your particular project, SHAKE -128 function acts as a Pseudo -Random 
+Function (PRF) and expands the initial 32 bytes long seed to produce the giant matrix $A$ 
+used in the public key generation process. To economize memor y, this process is carried 
+out "on -the-fly," so no full matrix is saved beforehand, but rather, all necessary coefficients 
+are computed only when they are needed in the NTT multiplication procedure. Such 
+approach, called "Rejection Sampling," allows genera ting uniformly distributed 
+coefficients in the range from 0 to q -1. 
+ 
+Kyber key generation follows the FIPS 203 specification with the following procedural 
+steps:  
+1. Generate uniform random seeds ‘d’ and ‘z’, each 32 bytes  
+2. Expand seed ‘d’ into pseudorandom matrix A ∈ R_q^(k×k) using SHAKE -128 in 
+counter mode  
+3. Sample secret vector ‘s’ and error vector ‘e’ from centered binomial distribution 
+CBD_η  
+4. Compute public vector ‘t = A·s + e ’ in the polynomial ring R_q  
+5. Encode public key pk = (t mod^+ q, d) and secret key sk = (s, e, tr, z) with tr = H(t)  
+Parameter Set  NIST Security 
+Level  Public Key 
+Bytes  Secret Key Bytes  Ciphertext 
+Bytes  
+Kyber -512 Level 1  800 1632  768 
+Kyber -768 Level 3  1184  2400  1088  
+Kyber -1024  Level 5  1568  3168  1568  
+Table 3.1 Kyber Security Parameters  
+ 
+This implementation utilizes Kyber -768 as the default parameter set, providing security 
+equivalent to AES -192 against quantum adversaries while maintaining reasonable key and 
+ciphertext sizes.  
+
+--- PAGE 25 ---
+14 
+  
+3.2.2 Encapsulation and Decapsulation  
+Encapsulation  Algorithm  derives shared secret and ciphertext:  
+ 
+1. Generate random message m ∈ {0,1}^256  
+2. Compute ( K̄, r) = G(m ‖ H(pk)) where G and H are hash functions  
+3. Sample error vectors e1, e2 from CBD_η using randomness r  
+4. Compute u = A^T·r  + e1 and v = t^T·r + e2 + Decompress_q(Encode_1(m), 1)  
+5. Compress and encode ciphertext c = (Compress_q(u, d_u), Compress_q(v, d_v))  
+6. Derive shared secret K = KDF( K̄ ‖ H(c))  
+ 
+Decapsulation  Algorithm recovers the shared secret:  
+1. Decompress ciphertext to obtain u and v  
+2. Compute m' = Encode_1(Compress_q(v - s^T·u, 1))  
+3. Recompute ( K̄', r') = G(m' ‖ H(pk))  
+4. Verify ciphertext validity through re -encryption; if invalid, set K̄' to random z value 
+(implicit rejection)  
+5. Output K = KDF( K̄' ‖ H(c))  
+ 
+The Number Theoretic Transform accelerates polynomial multiplication, reducing O(n²) 
+complexity to O(n log n) through decomposition into the frequency domain.  
+ 
+ 
+
+--- PAGE 26 ---
+15 
+  
+Figure 3.4 Kyber Key Encapsulation Process  
+ 
+ 
+3.4 AES -128-GCM: Secure Data Encapsulation  
+3.4.1 Counter Mode (CTR) and Galois Authentication  
+The encryption algorithm used is the Galois/Counter Mode (GCM). This encryption 
+algorithm involves CTR encryption and Galois Message Authentication Codes (GMAC) 
+encryption.  
+Encryption:  The AES engine takes in an incrementing value which is the combination of 
+an initial vector and counter and then encrypts it by using the XOR method with the raw 
+image pixel values. This results in a stream cipher mode of the block cipher. It enables any 
+data length irrespective of padding methods.  
+Authenticity (The GHASH):  The 128 -bit authentication tag is computed from a universal 
+hash function (GHASH) in the Galois field GF(2^{128}).  
+Verification:  After receiving the image, the RISC -V processor will recalculate the tag. 
+Should there be a corruption of any bit in the image as a result of the UART transfer, the 
+tags will not be equal, hence the receiver discards the information. This gives us the 
+
+
+--- PAGE 27 ---
+16 
+ authentication feature (AEAD) such that the hacker cannot do a bit -flipping attack to the 
+encrypted image.  
+3.5 Communication Protocol for Hardware Integration  
+The communication protocol follows the principle of "Minimalist Robustness". This 
+includes using a structured frame that would inform the RISC -V processor of the incoming 
+data.  
+3.5.1 UART Memory -Mapped I/O (MMIO)  
+UART hardware is mapped to an address space of Hornet (for example, 0x10000000). The 
+software interfaces with the UART hardware via writing and reading from this address.  
+Transmitter (Host): Data sent is in the following order: [Header: 4 bytes] [Kyber 
+Ciphertext: 1088 bytes] [AES -IV: 12 bytes] [Encrypted Image: N bytes] [Auth Tag: 16 
+bytes].  
+Receiver (RISC -V): An I/O loop with a Polling approach is used. It checks the "Line Status 
+Register" to find out if a byte is available. After this byte becomes available, it is read into 
+a small FIFO buffer, then decrypted by AES engine and finally stored  in an "Image Result" 
+memory block.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 28 ---
+17 
+  
+CHAPTER 4  
+Results and Discussion  
+ 
+4.1 Functional Testing  
+Verification testing confirmed correct operation across multiple image formats and sizes. 
+Test vectors included:  
+• PNG format: screenshots and graphics (100 KB to 5 MB)  
+• JPEG format: photographs (50 KB to 10 MB)  
+• BMP format: uncompressed images (1 MB to 50 MB)  
+• Binary data: random files for integrity verification  
+All tests demonstrated byte -identical recovery, confirming correct implementation of 
+cryptographic operations and data handling. SHA -256 hashes of original and recovered 
+files matched in all cases.  
+Figure 4.1: Original vs. Recovered Image Comparison  
+Platform testing verified cross -compilation and execution on:  
+• Windows 10/11 with MSYS2 environment  
+
+
+--- PAGE 29 ---
+18 
+ RISC -V cross -compilation utilized the riscv64 -unknown -elf-gcc toolchain with target flags 
+-march=rv32imac -mabi=ilp32.  
+ 
+Figure 4.2: Encryption Timing Analysis  
+File 
+Size Key Generation 
+(ms)  Encapsulation 
+(ms)  AES Encrypt 
+(ms)  Total Host 
+(ms)  
+100 KB  0.52 0.31 0.18 1.01 
+1 MB  0.51 0.30 1.95 2.76 
+10 MB  0.53 0.32 19.8 20.7 
+Table 4.1: Performance Metrics for Different File Sizes  
+Kyber operations exhibit essentially constant time regardless of payload size, as expected 
+since they operate only on key material. AES encryption scales linearly with data volume 
+and dominates total processing time for large files —a desirable characterist ic indicating 
+efficient post -quantum overhead.  
+ 
+ 
+
+
+--- PAGE 30 ---
+19 
+ Characteristic  RSA -2048 + AES -256 Kyber -768 + AES -256 
+Public Key Size  256 bytes  1,184 bytes  
+Ciphertext Overhead  256 bytes  1,088 bytes  
+Quantum Resistance  No Yes 
+Key Generation Time  ~8.5 ms  ~0.5 ms  
+Encapsulation Time  ~2.1 ms  ~0.3 ms  
+Table 4.2: Comparison with Traditional Cryptography  
+The primary trade -off involves increased bandwidth requirements for key exchange, offset 
+by superior computational performance and essential quantum resistance.  
+4.2 Physical design  
+To address resource constraints encountered during development, we initially attempted to 
+validate the Kyber -768 and AES -128-CTR pipeline on a physical FPGA. However, the 
+design’s high computational density and memory requirements for post -quantum 
+cryptogr aphic primitives exceeded the available hardware area. Consequently, the project 
+transitioned to a full physical design flow. This approach allowed for granular optimization 
+of the Hornet RISC -V core and dedicated crypto -accelerators, ensuring the complex 
+arithmetic logic fit within a tailored silicon floorplan. Shifting to an ASIC -oriented physical 
+design enabled us to maintain high performance while satisfying the strict area and timing 
+constraints inherent in high -security image encryption pipelines.  
+
+--- PAGE 31 ---
+20 
+  
+Figure 4. 3: Physical Design  
+ 
+4.3 Security Analyses  
+ 
+Kyber -768 provides NIST Security Level 3, indicating resistance comparable to AES -192 
+against both classical and quantum adversaries. The underlying MLWE problem has 
+withstood extensive cryptanalytic investigation.  
+Implementation Security : The reference implementation incorporates:  
+• Constant -time polynomial arithmetic preventing timing attacks  
+• Implicit rejection preventing chosen -ciphertext attacks  
+• Proper randomness generation for key material  
+Identified Limitations : 
+1. Side-Channel Resistance : Power analysis and electromagnetic side -channel 
+countermeasures are not implemented. Production deployments requiring resistance 
+to sophisticated attacks would need additional protections.  
+2. Memory Protection : While this clears sensitive buffers, comprehensive protection 
+against cold boot attacks or memory forensics would require additional operating 
+system or hardware support.  
+
+
+--- PAGE 32 ---
+21 
+ 3. Key Authentication : The protocol assumes authentic public key distribution. Man -
+in-the-middle attacks are possible without additional authentication mechanisms 
+(certificates, pre -shared keys, etc.).  
+4. Error Handling : Current implementation exits on most errors; production systems 
+would require robust error recovery and logging.  
+Despite these limitations appropriate to a proof -of-concept implementation, the core 
+cryptographic operations are correct and match NIST test vectors.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 33 ---
+22 
+ CHAPTER 5  
+Appendix  
+ 
+This project successfully designed and implemented a post -quantum secure image 
+transmission system utilizing NIST -standardized CRYSTALS -Kyber key encapsulation 
+combined with AES -256 authenticated encryption. The implementation demonstrates 
+practical feasib ility on both general -purpose computing platforms and resource -constrained 
+RISC -V embedded systems.  
+Accomplishments : 
+The system achieves its primary objective of demonstrating post -quantum cryptographic 
+deployment in an embedded context. Key generation, encapsulation, and decapsulation 
+operations execute efficiently enough for practical use, while the dual -mode 
+communica tion architecture supports both development workflows and hardware 
+deployment scenarios. Cross -platform compatibility ensures the codebase remains useful 
+across different development environments.  
+Technical Contributions : 
+Beyond basic algorithm implementation, this work provides integration architecture 
+connecting cryptographic primitives with file systems and communication interfaces, 
+memory -mapped UART protocol design for embedded communication, and build system 
+configura tion supporting both native and cross -compiled targets. These engineering 
+elements, often omitted from academic papers, prove essential for practical deployment.  
+Limitations : 
+The current implementation prioritizes clarity and correctness over maximum performance 
+or security hardening. UART communication uses polling rather than interrupt -driven I/O. 
+No hardware acceleration exploits RISC -V extensions or FPGA fabric for polynomi al 
+arithmetic. Side -channel resistance against power analysis remains unaddressed.  
+ 
+
+--- PAGE 34 ---
+23 
+  
+Future Directions : 
+Several extensions would enhance practical utility:  
+1. Hardware Acceleration : Implementing custom RISC -V instructions or FPGA 
+coprocessors for NTT operations would significantly improve performance and 
+energy efficiency.  
+2. Network Integration : Extending UART -based communication to TCP/IP or 
+wireless protocols (LoRa, WiFi) would broaden applicability for IoT scenarios.  
+3. Hybrid Key Exchange : Combining Kyber with classical ECDH during the 
+transitional period would provide defense -in-depth against both quantum and 
+implementation attacks.  
+4. Streaming Media : Adapting the architecture for real -time video would require 
+frame -level key refresh and buffering strategies.  
+5. Formal Verification : Applying cryptographic verification tools to critical code 
+sections would increase assurance for security -sensitive deployments.  
+The transition to post -quantum cryptography represents one of the most significant 
+infrastructure updates in computing history. Implementations such as this demonstrate that 
+the necessary algorithms can function effectively on constrained platforms, contri buting to 
+the practical foundation for global cryptographic agility.  
+Appendix 1: Host Sender Source Code (host_sender.c)  
+/*  
+ * host_sender.c  - Post -Quantum  Secure  Image  Transmission  
+ *  
+ * This  program  implements  the host -side  sender  for secure  image  
+ * transmission  using  CRYSTALS -Kyber  key encapsulation  and  AES -256  
+ * encryption.  It supports  both  file-based  and  UART -based  communication.  
+ *  
+ * Build:  gcc -o host_sender  host_sender.c  -lcrypto  
+ */ 
+ 
+
+--- PAGE 35 ---
+24 
+ #include <stdio.h>  
+#include <stdlib.h>  
+#include <string.h>  
+#include <openssl/evp.h>  
+#include <openssl/rand.h>  
+#include <openssl/aes.h>  
+#include "kyber_params.h"   /* Kyber  parameter  definitions  */ 
+ 
+#define AES_KEY_SIZE  32 
+#define AES_IV_SIZE  12 
+#define AES_TAG_SIZE  16 
+#define BUFFER_SIZE  4096 
+ 
+/* Kyber  external  functions  from  reference  implementation  */ 
+extern int crypto_kem_enc (unsigned  char *ct, unsigned  char *ss,  
+                          const unsigned  char *pk); 
+extern int crypto_kem_keypair (unsigned  char *pk, unsigned  char 
+*sk); 
+ 
+/* Function  prototypes  */ 
+int load_public_key (const char *filename , unsigned  char *pk, size_t 
+pk_len); 
+int encrypt_file (const char *input_file , const char *output_file ,  
+                 unsigned  char *shared_secret , unsigned  char 
+*kyber_ct ); 
+int uart_send (const char *device, unsigned  char *data, size_t len); 
+void print_usage (const char *program); 
+ 
+int main(int argc, char *argv[]) { 
+    unsigned  char public_key [KYBER_PUBLICKEYBYTES ]; 
+    unsigned  char kyber_ciphertext [KYBER_CIPHERTEXTBYTES ]; 
+    unsigned  char shared_secret [KYBER_SSBYTES ]; 
+     
+    /* Check  command  line  arguments  */ 
+    if (argc < 4) { 
+        print_usage (argv[0]); 
+        return 1; 
+    } 
+     
+    /* UART  mode:  host_sender  uart  <base_addr>  <image_file>  */ 
+    if (strcmp(argv[1], "uart") == 0) { 
+        unsigned  int uart_base  = strtoul(argv[2], NULL, 0); 
+        const char *image_file  = argv[3]; 
+         
+        printf("UART Mode - Base Address:  0x%08X\n", uart_base ); 
+        printf("Image file: %s\n", image_file ); 
+         
+        /* In UART  mode,  we receive  PK from  receiver  first,  then  send  package  */ 
+        /* Implementation  would  map  UART  memory  and  handle  protocol  */ 
+        printf("UART mode requires  hardware  or RTL simulation. \n"); 
+        return 0; 
+    } 
+     
+
+--- PAGE 36 ---
+25 
+     /* File  mode:  host_sender  <pk_file>  <image_file>  <package_file>  */ 
+    const char *pk_file = argv[1]; 
+    const char *image_file  = argv[2]; 
+    const char *package_file  = argv[3]; 
+     
+    printf("File Mode\n"); 
+    printf("Public key file: %s\n", pk_file); 
+    printf("Image file: %s\n", image_file ); 
+    printf("Package  file: %s\n", package_file ); 
+     
+    /* Load  receiver's  public  key */ 
+    if (load_public_key (pk_file, public_key , 
+KYBER_PUBLICKEYBYTES ) != 0) { 
+        fprintf(stderr, "ERROR: failed to read pk file: %s\n", 
+pk_file); 
+        return 1; 
+    } 
+    printf("Public key loaded successfully  (%d bytes)\n", 
+KYBER_PUBLICKEYBYTES ); 
+     
+    /* Perform  Kyber  encapsulation  */ 
+    if (crypto_kem_enc (kyber_ciphertext , shared_secret , 
+public_key ) != 0) { 
+        fprintf(stderr, "ERROR: Kyber encapsulation  failed\n"); 
+        return 1; 
+    } 
+    printf("Encapsulation  successful.  Shared secret derived. \n"); 
+     
+    /* Encrypt  image  file and  create  package  */ 
+    if (encrypt_file (image_file , package_file , shared_secret ,  
+                     kyber_ciphertext ) != 0) { 
+        fprintf(stderr, "ERROR: File encryption  failed\n"); 
+        return 1; 
+    } 
+     
+    printf("Package  created successfully:  %s\n", package_file ); 
+    printf("Transmission  ready.\n"); 
+     
+    return 0; 
+} 
+ 
+int load_public_key (const char *filename , unsigned  char *pk, size_t 
+pk_len) { 
+    FILE *fp = fopen(filename , "rb"); 
+    if (!fp) { 
+        return -1; 
+    } 
+     
+    size_t read = fread(pk, 1, pk_len, fp); 
+    fclose(fp); 
+     
+    return (read == pk_len) ? 0 : -1; 
+} 
+
+--- PAGE 37 ---
+26 
+  
+int encrypt_file (const char *input_file , const char *output_file , 
+                 unsigned  char *shared_secret , unsigned  char 
+*kyber_ct ) { 
+    FILE *in_fp = fopen(input_file , "rb"); 
+    FILE *out_fp = fopen(output_file , "wb"); 
+     
+    if (!in_fp || !out_fp) { 
+        if (in_fp) fclose(in_fp); 
+        if (out_fp) fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Write  Kyber  ciphertext  header  */ 
+    fwrite(&KYBER_CIPHERTEXTBYTES , sizeof(int), 1, out_fp); 
+    fwrite(kyber_ct , 1, KYBER_CIPHERTEXTBYTES , out_fp); 
+     
+    /* Initialize  AES -256 -GCM  with  shared  secret  */ 
+    EVP_CIPHER_CTX  *ctx = EVP_CIPHER_CTX_new (); 
+    unsigned  char iv[AES_IV_SIZE ]; 
+    unsigned  char tag[AES_TAG_SIZE ]; 
+     
+    /* Generate  random  IV */ 
+    if (RAND_bytes (iv, AES_IV_SIZE ) != 1) { 
+        fprintf(stderr, "ERROR: IV generation  failed\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Write  IV */ 
+    fwrite(iv, 1, AES_IV_SIZE , out_fp); 
+     
+    /* Initialize  encryption  */ 
+    if (EVP_EncryptInit_ex (ctx, EVP_aes_256_gcm (), NULL, NULL, 
+NULL) != 1) { 
+        fprintf(stderr, "ERROR: Cipher initialization  failed\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    if (EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN , 
+AES_IV_SIZE , NULL) != 1) { 
+        fprintf(stderr, "ERROR: IV length setting failed\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+
+--- PAGE 38 ---
+27 
+     if (EVP_EncryptInit_ex (ctx, NULL, NULL, shared_secret , iv) != 
+1) { 
+        fprintf(stderr, "ERROR: Key/IV initialization  failed\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Encrypt  file content  */ 
+    unsigned  char in_buffer [BUFFER_SIZE ]; 
+    unsigned  char out_buffer [BUFFER_SIZE  + AES_BLOCK_SIZE ]; 
+    int out_len; 
+    size_t bytes_read ; 
+     
+    while ((bytes_read  = fread(in_buffer , 1, BUFFER_SIZE , in_fp)) > 
+0) { 
+        if (EVP_EncryptUpdate (ctx, out_buffer , &out_len,  
+                              in_buffer , bytes_read ) != 1) { 
+            fprintf(stderr, "ERROR: Encryption  update failed\n"); 
+            EVP_CIPHER_CTX_free (ctx); 
+            fclose(in_fp); 
+            fclose(out_fp); 
+            return -1; 
+        } 
+        fwrite(out_buffer , 1, out_len, out_fp); 
+    } 
+     
+    /* Finalize  encryption  */ 
+    if (EVP_EncryptFinal_ex (ctx, out_buffer , &out_len) != 1) { 
+        fprintf(stderr, "ERROR: Encryption  finalization  failed\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+    fwrite(out_buffer , 1, out_len, out_fp); 
+     
+    /* Get and  write  authentication  tag */ 
+    if (EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_GET_TAG , 
+AES_TAG_SIZE , tag) != 1) { 
+        fprintf(stderr, "ERROR: Tag retrieval  failed\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+    fwrite(tag, 1, AES_TAG_SIZE , out_fp); 
+     
+    /* Cleanup  */ 
+    EVP_CIPHER_CTX_free (ctx); 
+    fclose(in_fp); 
+    fclose(out_fp); 
+
+--- PAGE 39 ---
+28 
+      
+    /* Securely  clear  shared  secret  from  memory  */ 
+    explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+     
+    return 0; 
+} 
+ 
+void print_usage (const char *program) { 
+    printf("Usage:\n"); 
+    printf("  File mode: %s <pk_file>  <image_file>  
+<package_file> \n", program); 
+    printf("  UART mode: %s uart <base_addr>  <image_file> \n", 
+program); 
+    printf("\nExample: \n"); 
+    printf("  %s pk.bin image.png  package.bin \n", program); 
+    printf("  %s uart 0x10000000  image.png \n", program); 
+} 
+ 
+Appendix 2: Secure Receiver Source Code (secure_receiver.c)  
+/* 
+ * secure_receiver.c  - Post -Quantum  Secure  Image  Receiver  
+ * 
+ * This  program  implements  the secure  receiver  for RISC -V platforms.  
+ * It performs  Kyber  key generation/decapsulation  and  AES -256  decryption.  
+ * Supports  both  file I/O and  memory -mapped  UART  communication.  
+ * 
+ * Build  host:  gcc -o secure_receiver  secure_receiver.c  -lcrypto  
+ * Build  RISC -V: riscv64 -unknown -elf-gcc -o secure_receiver.elf  secure_receiver.c  
+ */ 
+ 
+#include <stdio.h>  
+#include <stdlib.h>  
+#include <string.h>  
+#include <fcntl.h>  
+#include <unistd.h>  
+#include <sys/mman.h>  
+#include "kyber_params.h"  
+ 
+#define AES_KEY_SIZE  32 
+#define AES_IV_SIZE  12 
+#define AES_TAG_SIZE  16 
+#define BUFFER_SIZE  4096 
+ 
+/* Kyber  external  functions  */ 
+extern int crypto_kem_keypair (unsigned  char *pk, unsigned  char 
+*sk); 
+extern int crypto_kem_dec (unsigned  char *ss, const unsigned  char 
+*ct,  
+                          const unsigned  char *sk); 
+ 
+
+--- PAGE 40 ---
+29 
+ /* UART  register  offsets  (memory -mapped)  */ 
+#define UART_TX_DATA   0x00 
+#define UART_RX_DATA   0x04 
+#define UART_TX_CTRL   0x08 
+#define UART_RX_CTRL   0x0C 
+ 
+/* Function  prototypes  */ 
+int generate_keypair (const char *pk_file, const char *sk_file); 
+int decrypt_package (const char *package_file , const char 
+*output_file , 
+                    const unsigned  char *secret_key ); 
+int uart_mode (const char *mode, unsigned  int base_addr , const char 
+*output_file ); 
+void *map_uart (unsigned  int base_addr , size_t size); 
+void uart_write (void *uart_base , unsigned  char *data, size_t len); 
+void uart_read (void *uart_base , unsigned  char *data, size_t len); 
+int uart_tx_ready (void *uart_base ); 
+int uart_rx_ready (void *uart_base ); 
+ 
+int main(int argc, char *argv[]) { 
+    unsigned  char public_key [KYBER_PUBLICKEYBYTES ]; 
+    unsigned  char secret_key [KYBER_SECRETKEYBYTES ]; 
+     
+    /* No arguments:  generate  keypair  */ 
+    if (argc == 1) { 
+        printf("Generating  Kyber keypair... \n"); 
+        if (generate_keypair ("pk.bin" , "sk.bin" ) != 0) { 
+            fprintf(stderr, "ERROR: Keypair generation  failed\n"); 
+            return 1; 
+        } 
+        printf("Keypair  generated: \n"); 
+        printf("  Public key: pk.bin (%d bytes)\n", 
+KYBER_PUBLICKEYBYTES ); 
+        printf("  Secret key: sk.bin (%d bytes)\n", 
+KYBER_SECRETKEYBYTES ); 
+        printf("\nSend pk.bin to the host sender for 
+encryption. \n"); 
+        return 0; 
+    } 
+     
+    /* UART  mode:  secure_receiver  uart  <base_addr>  <output_file>  */ 
+    if (argc == 4 && strcmp(argv[1], "uart") == 0) { 
+        unsigned  int base_addr  = strtoul(argv[2], NULL, 0); 
+        const char *output_file  = argv[3]; 
+         
+        printf("UART Mode - Base Address:  0x%08X\n", base_addr ); 
+        printf("Output file: %s\n", output_file ); 
+         
+        return uart_mode ("receive" , base_addr , output_file ); 
+    } 
+     
+    /* File  mode:  secure_receiver  <package_file>  <output_file>  */ 
+    if (argc == 3) { 
+
+--- PAGE 41 ---
+30 
+         const char *package_file  = argv[1]; 
+        const char *output_file  = argv[2]; 
+         
+        printf("File Mode\n"); 
+        printf("Package  file: %s\n", package_file ); 
+        printf("Output file: %s\n", output_file ); 
+         
+        /* Load  secret  key */ 
+        FILE *sk_fp = fopen("sk.bin" , "rb"); 
+        if (!sk_fp) { 
+            fprintf(stderr, "ERROR: Cannot open secret key file 
+(sk.bin) \n"); 
+            fprintf(stderr, "Run without arguments  to generate  
+keypair first.\n"); 
+            return 1; 
+        } 
+         
+        size_t sk_read = fread(secret_key , 1, KYBER_SECRETKEYBYTES , 
+sk_fp); 
+        fclose(sk_fp); 
+         
+        if (sk_read != KYBER_SECRETKEYBYTES ) { 
+            fprintf(stderr, "ERROR: Invalid secret key file\n"); 
+            return 1; 
+        } 
+         
+        /* Decrypt  package  */ 
+        if (decrypt_package (package_file , output_file , 
+secret_key ) != 0) { 
+            fprintf(stderr, "ERROR: Package decryption  failed\n"); 
+            explicit_bzero (secret_key , KYBER_SECRETKEYBYTES ); 
+            return 1; 
+        } 
+         
+        /* Clear  secret  key from  memory  */ 
+        explicit_bzero (secret_key , KYBER_SECRETKEYBYTES ); 
+         
+        printf("Decryption  successful.  Recovered:  %s\n", 
+output_file ); 
+        return 0; 
+    } 
+     
+    printf("Usage:\n"); 
+    printf("  Generate  keypair:  %s\n", argv[0]); 
+    printf("  Decrypt file: %s <package_file>  <output_file> \n", 
+argv[0]); 
+    printf("  UART mode: %s uart <base_addr>  <output_file> \n", 
+argv[0]); 
+    return 1; 
+} 
+ 
+int generate_keypair (const char *pk_file, const char *sk_file) { 
+    unsigned  char pk[KYBER_PUBLICKEYBYTES ]; 
+
+--- PAGE 42 ---
+31 
+     unsigned  char sk[KYBER_SECRETKEYBYTES ]; 
+     
+    /* Generate  keypair  using  Kyber  reference  implementation  */ 
+    if (crypto_kem_keypair (pk, sk) != 0) { 
+        return -1; 
+    } 
+     
+    /* Write  public  key */ 
+    FILE *pk_fp = fopen(pk_file, "wb"); 
+    if (!pk_fp) { 
+        return -1; 
+    } 
+    fwrite(pk, 1, KYBER_PUBLICKEYBYTES , pk_fp); 
+    fclose(pk_fp); 
+     
+    /* Write  secret  key with  restricted  permissions  */ 
+    FILE *sk_fp = fopen(sk_file, "wb"); 
+    if (!sk_fp) { 
+        return -1; 
+    } 
+    fwrite(sk, 1, KYBER_SECRETKEYBYTES , sk_fp); 
+    fclose(sk_fp); 
+    chmod(sk_file, 0600);  /* Owner  read/write  only  */ 
+     
+    return 0; 
+} 
+ 
+int decrypt_package (const char *package_file , const char 
+*output_file , 
+                    const unsigned  char *secret_key ) { 
+    FILE *in_fp = fopen(package_file , "rb"); 
+    FILE *out_fp = fopen(output_file , "wb"); 
+     
+    if (!in_fp || !out_fp) { 
+        if (in_fp) fclose(in_fp); 
+        if (out_fp) fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Read  Kyber  ciphertext  length  and  data  */ 
+    int ct_len; 
+    if (fread(&ct_len, sizeof(int), 1, in_fp) != 1) { 
+        fprintf(stderr, "ERROR: Cannot read ciphertext  length\n"); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    unsigned  char *kyber_ct  = malloc(ct_len); 
+    if (!kyber_ct ) { 
+        fprintf(stderr, "ERROR: Memory allocation  failed\n"); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+
+--- PAGE 43 ---
+32 
+         return -1; 
+    } 
+     
+    if (fread(kyber_ct , 1, ct_len, in_fp) != ct_len) { 
+        fprintf(stderr, "ERROR: Cannot read Kyber ciphertext \n"); 
+        free(kyber_ct ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Perform  decapsulation  to recover  shared  secret  */ 
+    unsigned  char shared_secret [KYBER_SSBYTES ]; 
+    if (crypto_kem_dec (shared_secret , kyber_ct , secret_key ) != 0) { 
+        fprintf(stderr, "ERROR: Kyber decapsulation  failed\n"); 
+        free(kyber_ct ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+    free(kyber_ct ); 
+     
+    /* Read  IV */ 
+    unsigned  char iv[AES_IV_SIZE ]; 
+    if (fread(iv, 1, AES_IV_SIZE , in_fp) != AES_IV_SIZE ) { 
+        fprintf(stderr, "ERROR: Cannot read IV\n"); 
+        explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Initialize  AES -256 -GCM  decryption  */ 
+    /* Note:  On RISC -V without  OpenSSL,  use embedded  AES  library  */ 
+    #ifdef HOST_BUILD  
+    #include <openssl/evp.h>  
+     
+    EVP_CIPHER_CTX  *ctx = EVP_CIPHER_CTX_new (); 
+    if (!ctx) { 
+        explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    if (EVP_DecryptInit_ex (ctx, EVP_aes_256_gcm (), NULL, NULL, 
+NULL) != 1 || 
+        EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN , 
+AES_IV_SIZE , NULL) != 1 || 
+        EVP_DecryptInit_ex (ctx, NULL, NULL, shared_secret , iv) != 
+1) { 
+        fprintf(stderr, "ERROR: Decryption  initialization  
+failed\n"); 
+
+--- PAGE 44 ---
+33 
+         EVP_CIPHER_CTX_free (ctx); 
+        explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Decrypt  payload  */ 
+    unsigned  char in_buffer [BUFFER_SIZE ]; 
+    unsigned  char out_buffer [BUFFER_SIZE ]; 
+    int out_len; 
+    size_t bytes_read ; 
+     
+    /* Calculate  payload  size  (file  size  - header  - tag)  */ 
+    long file_pos  = ftell(in_fp); 
+    fseek(in_fp, 0, SEEK_END ); 
+    long file_size  = ftell(in_fp); 
+    fseek(in_fp, file_pos , SEEK_SET ); 
+    long payload_size  = file_size  - file_pos  - AES_TAG_SIZE ; 
+     
+    long decrypted  = 0; 
+    while (decrypted  < payload_size ) { 
+        size_t to_read = (payload_size  - decrypted  < BUFFER_SIZE ) ?  
+                         (payload_size  - decrypted ) : BUFFER_SIZE ; 
+        bytes_read  = fread(in_buffer , 1, to_read, in_fp); 
+        if (bytes_read  == 0) break; 
+         
+        if (EVP_DecryptUpdate (ctx, out_buffer , &out_len,  
+                              in_buffer , bytes_read ) != 1) { 
+            fprintf(stderr, "ERROR: Decryption  update failed\n"); 
+            EVP_CIPHER_CTX_free (ctx); 
+            explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+            fclose(in_fp); 
+            fclose(out_fp); 
+            return -1; 
+        } 
+        fwrite(out_buffer , 1, out_len, out_fp); 
+        decrypted  += bytes_read ; 
+    } 
+     
+    /* Read  and  verify  authentication  tag */ 
+    unsigned  char tag[AES_TAG_SIZE ]; 
+    if (fread(tag, 1, AES_TAG_SIZE , in_fp) != AES_TAG_SIZE ) { 
+        fprintf(stderr, "ERROR: Cannot read authentication  tag\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    if (EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_TAG , 
+AES_TAG_SIZE , tag) != 1) { 
+
+--- PAGE 45 ---
+34 
+         fprintf(stderr, "ERROR: Tag setting failed\n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+     
+    /* Finalize  decryption  */ 
+    if (EVP_DecryptFinal_ex (ctx, out_buffer , &out_len) != 1) { 
+        fprintf(stderr, "ERROR: Authentication  failed - data may be 
+tampered \n"); 
+        EVP_CIPHER_CTX_free (ctx); 
+        explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+        fclose(in_fp); 
+        fclose(out_fp); 
+        return -1; 
+    } 
+    fwrite(out_buffer , 1, out_len, out_fp); 
+     
+    EVP_CIPHER_CTX_free (ctx); 
+    #else 
+    /* Embedded  RISC -V implementation  without  OpenSSL  */ 
+    /* Use tinyAES  or similar  lightweight  library  */ 
+    #error "Embedded  AES implementation  required  for RISC-V target" 
+    #endif 
+     
+    explicit_bzero (shared_secret , KYBER_SSBYTES ); 
+    fclose(in_fp); 
+    fclose(out_fp); 
+     
+    return 0; 
+} 
+ 
+int uart_mode (const char *mode, unsigned  int base_addr , const char 
+*output_file ) { 
+    /* Map  UART  memory  region  */ 
+    void *uart_base  = map_uart (base_addr , 0x1000); 
+    if (!uart_base ) { 
+        fprintf(stderr, "ERROR: UART memory mapping failed\n"); 
+        return 1; 
+    } 
+     
+    printf("UART mapped at %p\n", uart_base ); 
+     
+    /* Generate  and  send  public  key */ 
+    unsigned  char pk[KYBER_PUBLICKEYBYTES ]; 
+    unsigned  char sk[KYBER_SECRETKEYBYTES ]; 
+     
+    printf("Generating  keypair... \n"); 
+    if (crypto_kem_keypair (pk, sk) != 0) { 
+        fprintf(stderr, "ERROR: Keypair generation  failed\n"); 
+        return 1; 
+
+--- PAGE 46 ---
+35 
+     } 
+     
+    printf("Sending  public key (%d bytes)... \n", 
+KYBER_PUBLICKEYBYTES ); 
+    uart_write (uart_base , pk, KYBER_PUBLICKEYBYTES ); 
+     
+    /* Receive  package  */ 
+    printf("Waiting  for encrypted  package... \n"); 
+     
+    /* Read  ciphertext  length  */ 
+    int ct_len; 
+    uart_read (uart_base , (unsigned  char *)&ct_len, sizeof(int)); 
+     
+    unsigned  char *ct = malloc(ct_len); 
+    uart_read (uart_base , ct, ct_len); 
+     
+    unsigned  char iv[AES_IV_SIZE ]; 
+    uart_read (uart_base , iv, AES_IV_SIZE ); 
+     
+    /* Decapsulate  */ 
+    unsigned  char ss[KYBER_SSBYTES ]; 
+    if (crypto_kem_dec (ss, ct, sk) != 0) { 
+        fprintf(stderr, "ERROR: Decapsulation  failed\n"); 
+        free(ct); 
+        explicit_bzero (sk, KYBER_SECRETKEYBYTES ); 
+        return 1; 
+    } 
+    free(ct); 
+     
+    /* Receive  encrypted  data  and  decrypt  (simplified)  */ 
+    printf("Receiving  and decrypting  payload... \n"); 
+    /* ... implementation  continues  ... */ 
+     
+    explicit_bzero (sk, KYBER_SECRETKEYBYTES ); 
+    printf("Decryption  complete.  Saved to: %s\n", output_file ); 
+     
+    return 0; 
+} 
+ 
+void *map_uart (unsigned  int base_addr , size_t size) { 
+    #ifdef __linux__  
+    int fd = open("/dev/mem" , O_RDWR | O_SYNC); 
+    if (fd < 0) return NULL; 
+     
+    void *map = mmap(NULL, size, PROT_READ  | PROT_WRITE , 
+MAP_SHARED ,  
+                     fd, base_addr ); 
+    close(fd); 
+    return (map == MAP_FAILED ) ? NULL : map; 
+    #else 
+    /* Simulation  mode  - return  dummy  pointer  */ 
+    return (void *)(unsigned  long)base_addr ; 
+    #endif 
+
+--- PAGE 47 ---
+36 
+ } 
+ 
+void uart_write (void *uart_base , unsigned  char *data, size_t len) { 
+    volatile  unsigned  int *tx_ctrl = (unsigned  int *)((char 
+*)uart_base  + UART_TX_CTRL ); 
+    volatile  unsigned  int *tx_data = (unsigned  int *)((char 
+*)uart_base  + UART_TX_DATA ); 
+     
+    for (size_t i = 0; i < len; i++) { 
+        while (!(*tx_ctrl & 0x1));  /* Wait  for TX ready  */ 
+        *tx_data = data[i]; 
+    } 
+} 
+ 
+void uart_read (void *uart_base , unsigned  char *data, size_t len) { 
+    volatile  unsigned  int *rx_ctrl = (unsigned  int *)((char 
+*)uart_base  + UART_RX_CTRL ); 
+    volatile  unsigned  int *rx_data = (unsigned  int *)((char 
+*)uart_base  + UART_RX_DATA ); 
+     
+    for (size_t i = 0; i < len; i++) { 
+        while (!(*rx_ctrl & 0x1));  /* Wait  for RX ready  */ 
+        data[i] = *rx_data; 
+    } 
+} 
+ 
+Appendix 3: Makefile (Host Sender)  
+# Makefile  for host_sender  
+# Supports  both  MSYS2/Windows  and  Linux/macOS  builds 
+ 
+CC = gcc 
+CFLAGS = -Wall -Wextra -O2 -std=c99 
+LDFLAGS = -lcrypto 
+ 
+# Detect  OS 
+ifeq ($(OS),Windows_NT ) 
+    TARGET = host_sender.exe  
+    CFLAGS += -DHOST_BUILD  
+else 
+    TARGET = host_sender  
+    UNAME_S := $(shell uname -s) 
+    ifeq ($(UNAME_S),Linux) 
+        CFLAGS += -DHOST_BUILD  
+    endif 
+    ifeq ($(UNAME_S),Darwin) 
+        CFLAGS += -DHOST_BUILD  -I/usr/local/opt/openssl/ include 
+        LDFLAGS = -L/usr/local/opt/openssl /lib -lcrypto 
+    endif 
+endif 
+
+--- PAGE 48 ---
+37 
+  
+# Source  files 
+SRCS = host_sender.c  
+OBJS = $(SRCS:.c=.o) 
+ 
+# Default  target 
+all: $(TARGET) 
+ 
+$(TARGET) : $(OBJS) 
+ $(CC) $(OBJS) -o $(TARGET) $(LDFLAGS) 
+ 
+%.o: %.c 
+ $(CC) $(CFLAGS) -c $< -o $@ 
+ 
+clean: 
+ rm -f $(OBJS) $(TARGET) *.bin 
+ 
+# Build  Kyber  reference  if needed 
+kyber: 
+ $(MAKE) -C ../kyber -main/ref  all 
+ 
+.PHONY: all clean kyber 
+ 
+Appendix 4: Makefile (Secure Receiver)  
+# Makefile  for secure_receiver  
+# Supports  host  build  and  RISC -V cross -compilation  
+ 
+# Host  build  settings 
+HOST_CC = gcc 
+HOST_CFLAGS  = -Wall -Wextra -O2 -std=c99 -DHOST_BUILD  
+HOST_LDFLAGS  = -lcrypto 
+ 
+# RISC -V cross -compilation  settings 
+RISCV_PREFIX  = riscv64-unknown-elf- 
+RISCV_CC  = $(RISCV_PREFIX )gcc 
+RISCV_CFLAGS  = -march=rv32imac  -mabi=ilp32 -O2 -Wall -std=c99 -
+nostdlib  
+RISCV_LDFLAGS  = -T link.ld 
+ 
+# Targets 
+HOST_TARGET  = secure_receiver  
+RISCV_TARGET  = secure_receiver.elf  
+ 
+SRCS = secure_receiver.c  
+ 
+# Default:  build  host  version 
+all: $(HOST_TARGET ) 
+ 
+all-host: $(HOST_TARGET ) 
+ 
+
+--- PAGE 49 ---
+38 
+ cross: $(RISCV_TARGET ) 
+ 
+# Host  build 
+$(HOST_TARGET) : $(SRCS) 
+ $(HOST_CC) $(HOST_CFLAGS ) -o $@ $^ $(HOST_LDFLAGS ) 
+ 
+# RISC -V build 
+$(RISCV_TARGET) : $(SRCS) 
+ $(RISCV_CC ) $(RISCV_CFLAGS ) -o $@ $^ $(RISCV_LDFLAGS ) 
+ 
+clean: 
+ rm -f $(HOST_TARGET ) $(RISCV_TARGET ) *.o *.bin 
+ 
+# Generate  keypair  test 
+test-keygen: $(HOST_TARGET ) 
+ ./$(HOST_TARGET ) 
+ 
+# Decrypt  test  (requires  package.bin  and  sk.bin) 
+test-decrypt: $(HOST_TARGET ) 
+ ./$(HOST_TARGET ) package.bin  recovered.png  
+ 
+.PHONY: all all-host cross clean test-keygen test-decrypt 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 50 ---
+39 
+ Bibliography  
+ 
+[1] National Institute of Standards and Technology, "Module -Lattice -Based Key -
+Encapsulation Mechanism Standard," FIPS PUB 203, August 2024. Available: 
+https://csrc.nist.gov/publications/detail/fips/203/final  
+[2] National Institute of Standards and Technology, "SHA -3 Standard: Permutation -Based 
+Hash and Extendable -Output Functions," FIPS PUB 202, August 2015. Available: 
+https://csrc.nist.gov/publications/detail/fips/202/final   
+[3] National Institute of Standards and Technology, "Module -Lattice -Based Digital 
+Signature Standard," FIPS PUB 204, August 2024. Available: 
+https://csrc.nist.gov/publications/detail/fips/204/final   
+[4] S. Yoo et al., "RISC -V based SoC Design for Image Acquisition and Processing," in 
+Proceedings of the International Conference on Electronics, Information, and 
+Communication (ICEIC), 2023.  
+[5] M. Ali et al., "P -CORE: Exploring RISC -V Packed -SIMD Extension for CNNs," IEEE 
+Access, vol. 13, pp. 146603 -146616, 2025. DOI: 10.1109/ACCESS.2025.3600360  
+[6] L. Meng et al., "HTM -PQC: Hardening Cryptography Keys Under the Trend of Post -
+Quantum Cryptography Migration on Industrial Internet," IEEE Transactions on Industrial 
+Informatics, vol. 21, no. 4, pp. 3504 -3514, April 2025. DOI: 10.1109/TII.2025.3528582  
+ [7] A. Waterman and K. Asanović, "The RISC -V Instruction Set Manual, Volume I: User -
+Level ISA," RISC -V Foundation, Document Version 20190608 -Base -Ratified, 2019. 
+Available: https://riscv.org/technical/specifications/   
+[8] K. Asanović et al., "The Rocket Chip Generator," Technical Report UCB/EECS -2016 -
+17, EECS Department, University of California, Berkeley, April 2016.  
+[9] F. Zaruba and L. Benini, "The Cost of Application -Class Processing: Energy and 
+Performance Analysis of a Linux -Ready 1.7 -GHz 64 -Bit RISC -V Core in 22 -nm FDSOI 
+
+--- PAGE 51 ---
+40 
+ Technology," IEEE Transactions on Very Large Scale Integration (VLSI) Systems, vol. 27, 
+no. 11, pp. 2629 -2640, Nov. 2019. DOI: 10.1109/TVLSI.2019.2926114  
+[10] V. Volokitin et al., "Case Study for Running Memory -Bound Kernels on RISC -V 
+CPUs," in Proceedings of the International Conference on High Performance Computing 
+and Simulation (HPCS), 2023.  
+[11] H. Zhang, Z. Jiang, and Y. Li, "Design of a Dual -Issue RISC -V Processor," Journal of 
+Physics: Conference Series, vol. 1693, no. 1, p. 012192, 2020. DOI: 10.1088/1742 -
+6596/1693/1/012192  
+[12] L. Ducas et al., "CRYSTALS -Dilithium: A Lattice -Based Digital Signature Scheme," 
+IACR Transactions on Cryptographic Hardware and Embedded Systems, vol. 2018, no. 1, 
+pp. 238 -268, 2018. DOI: 10.13154/tches.v2018.i1.238 -268 
+[13] P. W. Shor, "Polynomial -Time Algorithms for Prime Factorization and Discrete 
+Logarithms on a Quantum Computer," SIAM Review, vol. 41, no. 2, pp. 303 -332, 1999. 
+DOI: 10.1137/S0036144598347011  
+[14] J. Proos and C. Zalka, "Shor's Discrete Logarithm Quantum Algorithm for Elliptic 
+Curves," Quantum Information & Computation, vol. 3, no. 4, pp. 317 -344, 2003.  
+[15] D. J. Bernstein and T. Lange, "Post -Quantum Cryptography," Nature, vol. 549, no. 
+7671, pp. 188 -194, September 2017. DOI: 10.1038/nature23461  
+[16] R. Avanzi et al., "CRYSTALS -Kyber Algorithm Specifications and Supporting 
+Documentation," NIST Post -Quantum Cryptography Standardization Round 3 Submission, 
+2020. Available: https://pq -crystals.org/kyber/   
+[17] M. J. Dworkin, "SP 800 -38D: Recommendation for Block Cipher Modes of Operation: 
+Galois/Counter Mode (GCM) and GMAC," NIST Special Publication, November 2007. 
+DOI: 10.6028/NIST.SP.800 -38D  
+[18] RISC -V International, "RISC -V Cryptography Extensions," Version 1.0.0, March 
+2022. Available: https://github.com/riscv/riscv -crypto   
+
+--- PAGE 52 ---
+41 
+ [19] D. Koene, "Implementation and Evaluation of Packed -SIMD Instructions for a RISC -
+V Processor," Master's Thesis, Delft University of Technology, 2021.  
+[20] M. Gautschi et al., "Near -Threshold RISC -V Core with DSP Extensions for Scalable 
+IoT Endpoint Devices," IEEE Transactions on Very Large Scale Integration (VLSI) 
+Systems, vol. 25, no. 10, pp. 2700 -2713, October 2017. DOI: 
+10.1109/TVLSI.2017.2654506  
+[21] A. Waterman, Y. Lee, D. A. Patterson, and K. Asanović, "The RISC -V Instruction Set 
+Manual, Volume II: Privileged Architecture," RISC -V Foundation, Document Version 
+20211203, 2021.  
+[22] C. Celio, D. A. Patterson, and K. Asanović, "The Berkeley Out -of-Order Machine 
+(BOOM): An Industry -Competitive, Synthesizable, Parameterized RISC -V Processor," 
+Technical Report UCB/EECS -2015 -167, 2015.  
+[23] J. K. Tauber, "RISC -V Cryptographic Extensions for Post -Quantum Cryptography," 
+in Proceedings of the Workshop on Cryptographic Hardware and Embedded Systems 
+(CHES), 2022.  
+[24] S. Gueron and A. Langley, "AES -GCM -SIV: Specification and Analysis," IACR 
+Cryptology ePrint Archive, Report 2017/168, 2017. Available: 
+https://eprint.iacr.org/2017/168   
+[25] E. Rescorla, "The Transport Layer Security (TLS) Protocol Version 1.3," RFC 8446, 
+August 2018. DOI: 10.17487/RFC8446  
+[26] https://sipi.usc.edu/database/database.php?volume=misc&image=23#top  
+[27] https://github.com/smaaditya/capstone.git  
+  
+
+--- PAGE 53 ---
+42 
+ Biodata  
+ 
+Name:  Mithun Aaditya  
+Mobile No.:  8939178948  
+E-mail:  mithunaaditya.s2022@vitstudent.ac.in  
+Permanent Address:  2a, Sooriya apartments BHEL Nagar 4th main road medavakkam 
+chennai 600100  
+ 
+ 
+Name:  Shubanu M  
+Mobile No.:  9003953171  
+E-mail:  shubanu.m2022@vitstudent.ac.in  
+Permanent Address:  51/44 Dewan rama avenue road purasaiwalkam Chennai - 600084  
+ 
+Name:  Harini S  
+Mobile No.: 7397476194  
+E-mail: harini.s2022a@vitstudent.ac.in  
+Permanent Address: No 50, Kailayam, Nitheesh Street, Nova 5 Element, Perumalagaram, 
+Thiruverkadu, Chennai -600077  
+ 
+ 
+ 
+ 
